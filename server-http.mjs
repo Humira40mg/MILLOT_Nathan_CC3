@@ -25,8 +25,25 @@ Error: ENOENT: no such file or directory, open 'C:\Users\natha\OneDrive\Bureau\U
 D'après la documentation l'erreur ENOENT est lancée pour 
 indiqué qu'un fichier/entité cherché n'a pas été trouvée.
 
-Modifications sur la gestion d'erreur ligne 82.
+Modifications sur la gestion d'erreur ligne 39.
 
+
+  QUESTION 1.5
+async function requestListener(_request, response) {
+  try {
+    const contents = await fs.readFile("index.html", "utf8");
+    response.setHeader("Content-Type", "text/html");
+    response.writeHead(200);
+    return response.end(contents);
+  } catch (error) {
+    //QUESTION 1.4
+    if (error.code === "ENOENT") {
+      response.writeHead(500);
+      return response.end();
+    }
+    console.error(error);
+  }
+}
 
   QUESTION 1.6
 Cette commande a ajouté le dossier node_modules dans mon projet
@@ -64,6 +81,13 @@ eslint fonctionne :
 
 prettier m'a répondu :
   server-http.mjs 48ms
+
+
+  QUESTION 1.8 
+http://localhost:8000/index.html  : 200
+http://localhost:8000/random.html : 200
+http://localhost:8000/            : 404
+http://localhost:8000/dont-exist  : 404
 */
 import http from "node:http";
 import fs from "node:fs/promises";
@@ -71,20 +95,36 @@ import fs from "node:fs/promises";
 const host = "localhost";
 const port = 8000;
 
-//QUESTION 1.5 async/await pour requestListener
-async function requestListener(_request, response) {
+async function requestListener(request, response) {
+  response.setHeader("Content-Type", "text/html");
   try {
     const contents = await fs.readFile("index.html", "utf8");
-    response.setHeader("Content-Type", "text/html");
-    response.writeHead(200);
-    return response.end(contents);
-  } catch (error) {
-    //QUESTION 1.4
-    if (error.code === "ENOENT") {
-      response.writeHead(500);
-      return response.end();
+    //QUESTION 1.8
+    const urlSplited = request.url.split("/");
+    switch (urlSplited[1]) {
+      
+      case "" :
+        response.writeHead(200);
+        return response.end(contents);
+      
+        case "index.html" :
+        response.writeHead(200);
+        return response.end(contents);
+      
+        case "random.html":
+        response.writeHead(200);
+        //Gestion si le nombre n'est pas spécifié
+        if (urlSplited.length < 3) return response.end(`<html><p>${Math.floor(100 * Math.random())}</p></html>`);
+        return response.end(`<html><p>${Math.floor(parseInt(urlSplited[2]) * Math.random())}</p></html>`);
+      
+        default:
+        response.writeHead(404);
+        return response.end(`<html><p>404: NOT FOUND</p></html>`);
     }
+  } catch (error) {
     console.error(error);
+    response.writeHead(500);
+    return response.end(`<html><p>500: INTERNAL SERVER ERROR</p></html>`);
   }
 }
 
