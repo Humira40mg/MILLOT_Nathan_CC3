@@ -38,6 +38,21 @@ cache-control, et accept-ranges.
     QUESTION 2.4 
 L'événement listening est déclenché a chaque fois que le serveur
 démarre.
+
+
+
+    QUESTION 2.5 
+L'option activé défaut est 'index', pour le modifier on peut ajouter en argument
+un objet { index: "cequonveux.html" } dans 'express.static'.
+
+
+
+    QUESTION 2.6
+Si on active le cache alors avec Ctrl+R on obtient un 
+status 304 qui signifie "NOT MODIFIED" donc que le style.css 
+est toujours dans le cache.
+Avec Ctrl+shift+R on a un status 200 on a bien re-téléchargé
+le fichier.
 */
 
 import express from "express";
@@ -48,9 +63,9 @@ const port = 8000;
 
 const app = express();
 
-app.get(["/", "/index.html"], async function (request, response, next) {
-  response.sendFile("index.html", { root: "./" });
-});
+if (app.get("env") === "development") app.use(morgan("dev"));
+
+app.use(express.static("static"));
 
 app.get("/random/:nb", async function (request, response, next) {
   const length = request.params.nb;
