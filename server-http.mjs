@@ -1,10 +1,21 @@
 /* QUESTION 1.1
-La liste des en-têtes est vide.
+La liste des en-têtes est :
+  connection: keep-alive
+  date: Mon, 30 Sep 2024 04:27:48 GMT
+  keep-alive: timeout=5
+  transfer-encoding: chunked
 
 
   QUESTION 1.2
-La liste des en-têtes est toujours vide le seul changement 
-dans la réponse concerne le "body".
+La liste des en-têtes est :
+  connection: keep-alive
+  content-length: 20
+  content-type: application/json
+  date: Mon, 30 Sep 2024 04:29:24 GMT
+  keep-alive: timeout=5
+
+Maintenant on a aussi le type de contenu ainsi que sa taille.
+
 
 
   QUESTION 1.3
@@ -107,17 +118,21 @@ async function requestListener(request, response) {
         response.writeHead(200);
         return response.end(contents);
       
-        case "index.html" :
+      case "index.html" :
         response.writeHead(200);
         return response.end(contents);
       
-        case "random.html":
+      case "random.html": {
         response.writeHead(200);
-        //Gestion si le nombre n'est pas spécifié
-        if (urlSplited.length < 3) return response.end(`<html><p>${Math.floor(100 * Math.random())}</p></html>`);
-        return response.end(`<html><p>${Math.floor(parseInt(urlSplited[2]) * Math.random())}</p></html>`);
+        
+          let list = "";
+          for (let i = 0; i < parseInt(urlSplited[2]); i++) {
+            list += `<li>${Math.floor(100 * Math.random())}</li>`;
+          }
+        return response.end(`<html><ul>${list}</ul></html>`);
+      }
       
-        default:
+      default:
         response.writeHead(404);
         return response.end(`<html><p>404: NOT FOUND</p></html>`);
     }
