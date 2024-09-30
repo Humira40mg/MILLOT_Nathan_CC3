@@ -65,14 +65,16 @@ const app = express();
 
 if (app.get("env") === "development") app.use(morgan("dev"));
 
+app.set("view engine", "ejs");
+
 app.use(express.static("static"));
 
 app.get("/random/:nb", async function (request, response, next) {
   const length = request.params.nb;
-  const contents = Array.from({ length })
-    .map((_) => `<li>${Math.floor(100 * Math.random())}</li>`)
-    .join("\n");
-  return response.send(`<html><ul>${contents}</ul></html>`);
+  const numbers = Array.from({ length })
+    .map(() => Math.floor(100 * Math.random()));
+  const welcome = "Génération de nombre floppèsques...";
+  return response.render("random", {numbers, welcome});
 });
 
 const server = app.listen(port, host);
