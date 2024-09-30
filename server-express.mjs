@@ -57,6 +57,7 @@ le fichier.
 
 import express from "express";
 import morgan from "morgan";
+import createError from "http-errors";
 
 const host = "localhost";
 const port = 8000;
@@ -70,11 +71,15 @@ app.set("view engine", "ejs");
 app.use(express.static("static"));
 
 app.get("/random/:nb", async function (request, response, next) {
-  const length = request.params.nb;
-  const numbers = Array.from({ length })
-    .map(() => Math.floor(100 * Math.random()));
-  const welcome = "Génération de nombre floppèsques...";
-  return response.render("random", {numbers, welcome});
+    //QUESTION 2.6 : Gestion d'Erreurs. 
+    const length = Number.parseInt(request.params.nb, 10);
+    if (Number.isNaN(length)) return next(createError(400));
+
+    const numbers = Array.from({ length })
+        .map(() => Math.floor(100 * Math.random()));
+    const welcome = "Génération de nombre floppèsques...";
+
+    return response.render("random", {numbers, welcome});
 });
 
 const server = app.listen(port, host);
